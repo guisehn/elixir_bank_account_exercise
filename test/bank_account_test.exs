@@ -22,4 +22,13 @@ defmodule BankAccountTest do
     send(account, {:check_balance, self})
     assert_receive {:balance, 30}
   end
+
+  test "responds with all the actions performed" do
+    account = spawn_link(BankAccount, :start, [])
+    send(account, {:deposit, 50})
+    send(account, {:withdraw, 20})
+    send(account, {:deposit, 10})
+    send(account, {:check_actions, self})
+    assert_receive {:actions, [{:deposit, 50}, {:withdraw, 20}, {:deposit, 10}]}
+  end
 end
