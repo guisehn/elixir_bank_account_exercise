@@ -7,8 +7,8 @@ defmodule BankAccount do
     receive do
       {:check_balance, pid} -> send_balance(pid, balance)
       {:check_actions, pid} -> send_actions(pid, actions)
-      {:deposit, amount}    -> balance = deposit(balance, amount); actions = actions ++ [{:deposit, amount}]
-      {:withdraw, amount}   -> balance = withdraw(balance, amount); actions = actions ++ [{:withdraw, amount}]
+      {:deposit, amount}    -> {actions, balance} = deposit(actions, balance, amount)
+      {:withdraw, amount}   -> {actions, balance} = withdraw(actions, balance, amount)
     end
 
     await(actions, balance)
@@ -22,11 +22,13 @@ defmodule BankAccount do
     send(pid, {:actions, actions})
   end
 
-  defp deposit(balance, amount) do
-    balance + amount
+  defp deposit(actions, balance, amount) do
+    updated_action_list = actions ++ [{:deposit, amount}]
+    {updated_action_list, balance + amount}
   end
 
-  defp withdraw(balance, amount) do
-    balance - amount
+  defp withdraw(actions, balance, amount) do
+    updated_action_list = actions ++ [{:withdraw, amount}]
+    {updated_action_list, balance - amount}
   end
 end
